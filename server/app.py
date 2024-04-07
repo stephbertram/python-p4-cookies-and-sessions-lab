@@ -22,13 +22,24 @@ def clear_session():
 
 @app.route('/articles')
 def index_articles():
-
-    pass
+    try:
+        articles = [article.to_dict() for article in Article.query]
+        return articles, 200
+    except Exception as e:
+        return {"error": str(e)}, 400
 
 @app.route('/articles/<int:id>')
 def show_article(id):
 
-    pass
+    # Retrieves the value of the 'page_views' key from the Flask session
+    # If the key doesn't exist, it sets the value to 0
+    session['page_views'] = session.get('page_views') or 0
+    session['page_views'] += 1
+
+    if session['page_views'] <=3:
+        return Article.query.filter(Article.id == id).first().to_dict(), 200
+    else:
+        return {'message': 'Maximum pageview limit reached'}, 401
 
 if __name__ == '__main__':
     app.run(port=5555)
